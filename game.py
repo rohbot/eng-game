@@ -3,20 +3,45 @@ import time
 import os
 import serial
 import sys
+import RPi.GPIO as GPIO
+#import pyttsx
+
+def shutdown(channel):
+	logfile = open('shutdown.log', 'a')
+	logfile.write(str(time.time()) + " shutting down\n")
+	logfile.close()
+	#os.system('flite -t "System Shutdown"')
+	print 'Shutdown'
+	pygame.quit()
+	time.sleep(1)	
+	os.system('sudo shutdown -h now')
+	sys.exit()
+	
+def setup():
+    print "Shutdown script"
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(14, GPIO.IN, pull_up_down = GPIO.PUD_UP)
+    GPIO.setup(12, GPIO.OUT)
+    GPIO.add_event_detect(14, GPIO.FALLING, callback = shutdown, bouncetime = 2000)
+    GPIO.output(12, GPIO.HIGH)
+
+setup()
+
+
+
 strPort1 = '/dev/ttyACM0'
-strPort2 = '/dev/ttyACM1'
 
 
 
 
 WIDTH = 1280
-HEIGHT = 720
+HEIGHT = 700
 
 IMG_WIDTH = 400
 IMG_HEIGHT = 500
 
-L_WIDTH = ((WIDTH / 2) - 400) / 2 
-R_WIDTH = L_WIDTH + (WIDTH / 2)
+L_WIDTH = ((WIDTH / 2) - 400) / 2 + 50
+R_WIDTH = L_WIDTH + (WIDTH / 2) - 220
 
 images = []
 
@@ -41,15 +66,17 @@ for i in range(10):
 	images.append(pygame.image.load(fn))
 
 
-img = {'start':pygame.image.load(path + "ENGST.jpg"),
-		'ready':pygame.image.load(path + "ENGGR.jpg"),
-		'finish':pygame.image.load(path + "ENGFN.jpg"),
+img = {'start':pygame.image.load(path + "ENGST.png"),
+		'ready':pygame.image.load(path + "ENGGR.png"),
+		'finish':pygame.image.load(path + "ENGFN.png"),
 		'logo':pygame.image.load(path + "bb.jpg"),
-		'game-bg': pygame.transform.scale(pygame.image.load(path + "ENGBG.jpg"),(WIDTH,HEIGHT)),
-		'wait': pygame.image.load(path + "ENGRP.jpg"),
-		'success': pygame.image.load(path + "ENGCG.jpg"),
-		'tryagain': pygame.image.load(path + "ENGTA.jpg"),
-		'code': pygame.image.load(path + "ENGSC.jpg"),
+		'game-bg': pygame.transform.scale(pygame.image.load(path + "ENGBG.png"),(WIDTH,HEIGHT)),
+		'wait': pygame.transform.scale(pygame.image.load(path + "ENGRP.png"),(WIDTH,HEIGHT)),
+		'success': pygame.image.load(path + "ENGCG.png"),
+		'tryagain': pygame.image.load(path + "ENGTA.png"),
+		'code': pygame.image.load(path + "ENGSC.png"),
+		'code2': pygame.image.load(path + "ENGSC_2.png"),
+
 		}
 
 
@@ -142,7 +169,11 @@ def showResult(line):
 		# screen.blit(img_ready, (0, 0))
 		# pygame.display.flip()
 	if line[2] == "C":
-		show_image('code') 
+		show_image('code')
+		time.sleep(10) 
+		show_image('code2')
+		time.sleep(10) 
+
 		
 	
 
@@ -151,7 +182,7 @@ def showLogo():
 	screen.blit(img_logo, (0, 0))
 	pygame.display.flip()
 
-\
+
 
 #showLogo()
 #waiting()
